@@ -38,25 +38,65 @@ class Bit:
     
 
 class HammingCode:
-    def __init__(self, data:List[Bit]):
-        self.data = data
-        self.m = len(data)
-        self.r = 0
-        while 2**self.r < self.m + self.r + 1:
-            self.r += 1
+    
+    @staticmethod
+    def encode(data:List[Bit]):
+        m = len(data)
+        r = HammingCode.find_parity_length(m)
         
-    def encode(self):
-        encoded = List[Bit](self.m + self.r)
+        encoded = List[Bit](m +r)
         
+        # find parity bits locations
         parity_indices = [2**i - 1 for i in range(self.r)]
-        data_indexes = [i for i in range(self.m + self.r) if i not in parity_indices]
-        
-        for data_index in data_indexes:
-            encoded[data_index] = self.data[data_index]
-        
-        for parity_index in parity_indices:
-            parity_check_indices = [i for i in range(self.m + self.r) if i & (1 << parity_index)]
-            
-                
-        
-        
+        # fill data bits in encoded array
+        for i in range(len(encoded)):
+            if i in parity_indices:
+                continue
+            encoded[i] = data[i]
+
+        for i in range(r):
+            parity = HammingCode.check_parity(encoded, i)
+            encoded[2**i - 1] = parity
+
+        return encoded
+    
+    
+    @staticmethod
+    def find_parity_length(m:int):
+        r = 0
+        while 2**r < m + r + 1:
+            r += 1
+        return r
+    
+    @staticmethod      
+    def check_parity(received:List[Bit], parity_index:int):
+        parity = Bit(0)
+        for i in range(len(received)):
+            if i & (1 << parity_index):
+                parity = parity ^ received[i]
+        return parity
+    
+    @staticmethod
+    def check_error(received:List[Bit]):
+        r = HammingCode.find_parity_length(len(received))
+        error_index = 0
+        for i in range(r):
+            parity = HammingCode.check_parity(received, i)
+            if parity.value:
+                error_index += 2**i
+        return error_index
+    
+    @staticmethod
+    def decode(received:List[Bit]):
+        r = HammingCode.find_parity_length(len(received))
+        error_index = HammingCode.check_error(received)
+        if error_index:
+            received[error_index] = received[error_index] ^ Bit(1)
+        decoded = List[Bit](len(received) - r)
+        j = 0
+        for i in range(len(received)):
+            if i  == 2**j - 1:
+                j += 1
+                continue
+            decoded.append(received[i])
+        return decoded
