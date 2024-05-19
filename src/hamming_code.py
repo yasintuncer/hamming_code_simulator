@@ -91,7 +91,7 @@ class HammingCode:
         r = HammingCode.find_parity_length(len(received))
         error_index = HammingCode.check_error(received)
         if error_index:
-            received[error_index] = received[error_index] ^ Bit(1)
+            return error_index
         decoded = List[Bit](len(received) - r)
         j = 0
         for i in range(len(received)):
