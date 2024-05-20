@@ -2,8 +2,6 @@
 
 import os
 
-from setuptools import setup, find_packages
-
 # get file path
 file_path = os.path.dirname(os.path.realpath(__file__))
 
